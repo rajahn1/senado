@@ -187,21 +187,115 @@ function aggregateByParty() {
   return [...grouped.values()].sort((a, b) => b.yes + b.no - (a.yes + a.no));
 }
 
-function initChart() {
-  const container = document.querySelector("#party-chart");
-  const fallback = document.querySelector("#chart-fallback");
+function initCharts() {
+  const containers = [...document.querySelectorAll("#result-chart, #pt-chart, #party-chart")];
 
   if (!window.echarts) {
-    container.hidden = true;
-    fallback.hidden = false;
+    containers.forEach((container) => {
+      container.hidden = true;
+      const fallback = container.parentElement.querySelector(".chart-fallback");
+      if (fallback) fallback.hidden = false;
+    });
     return;
   }
 
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const animationDuration = prefersReducedMotion ? 0 : 700;
+  const sharedTextStyle = {
+    fontFamily: "Arial, Helvetica, sans-serif",
+    color: "#101b2d",
+  };
+  const sharedToolbox = {
+    right: 5,
+    bottom: 2,
+    feature: { saveAsImage: { title: "Baixar gráfico", pixelRatio: 2 } },
+    iconStyle: { borderColor: "#5d6673" },
+    emphasis: { iconStyle: { borderColor: "#123358" } },
+  };
+
+  const resultChart = echarts.init(document.querySelector("#result-chart"), null, {
+    renderer: "canvas",
+  });
+  resultChart.setOption({
+    animationDuration,
+    textStyle: sharedTextStyle,
+    title: {
+      text: "40 × 38",
+      subtext: "votos nominais",
+      left: "center",
+      top: "43%",
+      textStyle: { fontFamily: "Georgia, serif", fontSize: 42, color: "#101b2d" },
+      subtextStyle: { fontSize: 13, color: "#6a7078" },
+    },
+    tooltip: {
+      trigger: "item",
+      formatter: "{b}: {c} votos ({d}%)",
+      backgroundColor: "#091f38",
+      borderWidth: 0,
+      textStyle: { color: "#ffffff" },
+    },
+    toolbox: sharedToolbox,
+    series: [
+      {
+        type: "pie",
+        radius: ["58%", "79%"],
+        center: ["50%", "54%"],
+        avoidLabelOverlap: true,
+        label: { show: false },
+        itemStyle: { borderColor: "#ffffff", borderWidth: 4 },
+        emphasis: { scaleSize: 8 },
+        data: [
+          { value: 40, name: "Sim", itemStyle: { color: "#16845b" } },
+          { value: 38, name: "Não", itemStyle: { color: "#c7463a" } },
+        ],
+      },
+    ],
+  });
+
+  const ptVotes = votes.filter((item) => item.party === "PT");
+  const ptYes = ptVotes.filter((item) => item.vote === "SIM").length;
+  const ptChart = echarts.init(document.querySelector("#pt-chart"), null, {
+    renderer: "canvas",
+  });
+  ptChart.setOption({
+    animationDuration,
+    textStyle: sharedTextStyle,
+    title: {
+      text: `${ptYes} de ${ptVotes.length}`,
+      subtext: "votos SIM",
+      left: "center",
+      top: "43%",
+      textStyle: { fontFamily: "Georgia, serif", fontSize: 42, color: "#0e6544" },
+      subtextStyle: { fontSize: 13, color: "#6a7078" },
+    },
+    tooltip: {
+      trigger: "item",
+      formatter: "PT: {c} votos {b}",
+      backgroundColor: "#091f38",
+      borderWidth: 0,
+      textStyle: { color: "#ffffff" },
+    },
+    toolbox: sharedToolbox,
+    series: [
+      {
+        type: "pie",
+        radius: ["58%", "79%"],
+        center: ["50%", "54%"],
+        label: { show: false },
+        itemStyle: { borderColor: "#ffffff", borderWidth: 4 },
+        emphasis: { scaleSize: 8 },
+        data: [{ value: ptYes, name: "Sim", itemStyle: { color: "#16845b" } }],
+      },
+    ],
+  });
+
   const data = aggregateByParty();
-  const chart = echarts.init(container, null, { renderer: "canvas" });
-  chart.setOption({
-    animationDuration: 700,
-    textStyle: { fontFamily: "Arial, Helvetica, sans-serif", color: "#101b2d" },
+  const partyChart = echarts.init(document.querySelector("#party-chart"), null, {
+    renderer: "canvas",
+  });
+  partyChart.setOption({
+    animationDuration,
+    textStyle: sharedTextStyle,
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
@@ -216,16 +310,13 @@ function initChart() {
       },
     },
     toolbox: {
-      right: 8,
-      bottom: 2,
+      ...sharedToolbox,
       feature: {
         saveAsImage: { title: "Baixar gráfico", pixelRatio: 2 },
         restore: { title: "Restaurar" },
       },
-      iconStyle: { borderColor: "#5d6673" },
-      emphasis: { iconStyle: { borderColor: "#123358" } },
     },
-    grid: { left: 18, right: 35, top: 58, bottom: 42, containLabel: true },
+    grid: { left: 18, right: 35, top: 48, bottom: 46, containLabel: true },
     xAxis: {
       type: "value",
       minInterval: 1,
@@ -238,7 +329,7 @@ function initChart() {
       type: "category",
       inverse: true,
       data: data.map((item) => item.party),
-      axisLabel: { color: "#101b2d", fontSize: 12, margin: 13 },
+      axisLabel: { color: "#101b2d", fontSize: 13, margin: 13 },
       axisLine: { show: false },
       axisTick: { show: false },
     },
@@ -247,7 +338,7 @@ function initChart() {
         name: "Sim",
         type: "bar",
         stack: "total",
-        barMaxWidth: 22,
+        barMaxWidth: 30,
         itemStyle: { color: "#16845b" },
         emphasis: { focus: "series" },
         data: data.map((item) => item.yes),
@@ -256,7 +347,7 @@ function initChart() {
         name: "Não",
         type: "bar",
         stack: "total",
-        barMaxWidth: 22,
+        barMaxWidth: 30,
         itemStyle: { color: "#c7463a" },
         emphasis: { focus: "series" },
         data: data.map((item) => item.no),
@@ -264,14 +355,15 @@ function initChart() {
     ],
   });
 
-  chart.on("click", (params) => {
+  partyChart.on("click", (params) => {
     if (!params.name) return;
     elements.party.value = params.name;
     renderVotes();
     document.querySelector("#lista-votos").scrollIntoView({ behavior: "smooth" });
   });
 
-  window.addEventListener("resize", () => chart.resize());
+  const charts = [resultChart, ptChart, partyChart];
+  window.addEventListener("resize", () => charts.forEach((chart) => chart.resize()));
 }
 
 [elements.search, elements.party, elements.vote].forEach((control) => {
@@ -282,4 +374,4 @@ elements.clear.addEventListener("click", clearFilters);
 renderOrientations();
 populatePartyFilter();
 renderVotes();
-initChart();
+initCharts();
