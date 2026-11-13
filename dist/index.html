@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Painel interativo da votação do Requerimento nº 770/2026, sobre urgência para o PLP 299/2026."
+    />
+    <title>Votação no Senado — PLP 299/2026</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2232%22 fill=%22%23091f38%22/><text x=%2232%22 y=%2240%22 text-anchor=%22middle%22 font-size=%2224%22 fill=%22%23c59b38%22>SF</text></svg>" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#lista-votos">Pular para a lista de votos</a>
+
+    <header class="topbar">
+      <div class="page-shell topbar__inner">
+        <a class="brand" href="#inicio" aria-label="Ir ao início">
+          <span class="brand__mark" aria-hidden="true">SF</span>
+          <span>
+            <strong>Senado em dados</strong>
+            <small>Votação aberta</small>
+          </span>
+        </a>
+        <a class="topbar__link" href="#lista-votos">Ver todos os votos</a>
+      </div>
+    </header>
+
+    <main id="inicio">
+      <section class="hero">
+        <div class="page-shell hero__grid">
+          <div class="hero__copy">
+            <p class="kicker">Requerimento nº 770, de 2026</p>
+            <h1>Urgência para o<br />PLP 299/2026</h1>
+            <p class="hero__summary">
+              O Senado aprovou o pedido de urgência por uma diferença de
+              <strong>dois votos</strong> entre os senadores que votaram “sim” e “não”.
+            </p>
+
+            <dl class="session-meta">
+              <div>
+                <dt>Sessão</dt>
+                <dd>146ª Sessão Deliberativa Ordinária</dd>
+              </div>
+              <div>
+                <dt>Votação</dt>
+                <dd>12 nov. 2026, 17h55–18h26</dd>
+              </div>
+              <div>
+                <dt>Quórum</dt>
+                <dd>Simples · votação aberta</dd>
+              </div>
+            </dl>
+          </div>
+
+          <aside class="scoreboard" aria-label="Resultado da votação">
+            <p class="scoreboard__label">Resultado</p>
+            <div class="scoreboard__numbers">
+              <div class="score scoreboard__yes">
+                <span>40</span>
+                <small>Sim</small>
+              </div>
+              <div class="scoreboard__divider" aria-hidden="true"></div>
+              <div class="score scoreboard__no">
+                <span>38</span>
+                <small>Não</small>
+              </div>
+            </div>
+            <div class="scoreboard__bar" aria-hidden="true">
+              <span class="scoreboard__bar-yes"></span>
+              <span class="scoreboard__bar-no"></span>
+            </div>
+            <div class="scoreboard__foot">
+              <span>0 abstenções</span>
+              <span>1 presidente</span>
+            </div>
+            <p class="scoreboard__president">Presidente: Davi Alcolumbre</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="chart-section" aria-labelledby="grafico-titulo">
+        <div class="page-shell">
+          <div class="section-heading">
+            <div>
+              <p class="section-index">Leitura por bancada</p>
+              <h2 id="grafico-titulo">Como votou cada partido</h2>
+            </div>
+            <p>
+              Barras mais longas indicam bancadas com mais votos registrados.
+              Selecione uma barra para filtrar a lista nominal.
+            </p>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card__legend" aria-label="Legenda do gráfico">
+              <span><i class="legend-dot legend-dot--yes"></i>Sim</span>
+              <span><i class="legend-dot legend-dot--no"></i>Não</span>
+            </div>
+            <div
+              id="party-chart"
+              class="party-chart"
+              role="img"
+              aria-label="Gráfico de barras empilhadas com votos sim e não por partido"
+            ></div>
+            <p id="chart-fallback" class="chart-fallback" hidden>
+              O gráfico não pôde ser carregado. A lista nominal abaixo continua disponível.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="orientation-section" aria-labelledby="orientacao-titulo">
+        <div class="page-shell orientation-grid">
+          <div>
+            <p class="section-index">Orientação declarada</p>
+            <h2 id="orientacao-titulo">A indicação das lideranças</h2>
+            <p class="orientation-copy">
+              O relatório também registra a orientação oficial de sete partidos,
+              do Governo e da Oposição. A orientação não determina o voto individual.
+            </p>
+          </div>
+          <div class="orientation-list" id="orientation-list"></div>
+        </div>
+      </section>
+
+      <section class="votes-section" id="lista-votos" aria-labelledby="lista-titulo">
+        <div class="page-shell">
+          <div class="section-heading section-heading--votes">
+            <div>
+              <p class="section-index">Votação nominal</p>
+              <h2 id="lista-titulo">Quem votou e como votou</h2>
+            </div>
+            <p id="result-count" aria-live="polite"></p>
+          </div>
+
+          <div class="filters" aria-label="Filtros da lista de votos">
+            <label class="search-field">
+              <span>Buscar senador</span>
+              <input id="search-input" type="search" placeholder="Digite um nome" autocomplete="off" />
+            </label>
+            <label>
+              <span>Partido</span>
+              <select id="party-filter">
+                <option value="todos">Todos os partidos</option>
+              </select>
+            </label>
+            <label>
+              <span>Voto</span>
+              <select id="vote-filter">
+                <option value="todos">Todos os votos</option>
+                <option value="SIM">Sim</option>
+                <option value="NÃO">Não</option>
+              </select>
+            </label>
+            <button id="clear-filters" class="clear-button" type="button">Limpar filtros</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Senador</th>
+                  <th scope="col">Partido</th>
+                  <th scope="col">UF</th>
+                  <th scope="col">Voto</th>
+                </tr>
+              </thead>
+              <tbody id="votes-body"></tbody>
+            </table>
+            <p id="empty-state" class="empty-state" hidden>
+              Nenhum voto corresponde aos filtros selecionados.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="page-shell footer__inner">
+        <p>Dados transcritos do relatório de votação aberta do Senado Federal.</p>
+        <p>Emissão do documento: 12/11/2026 às 18h26.</p>
+      </div>
+    </footer>
+  </body>
+</html>
